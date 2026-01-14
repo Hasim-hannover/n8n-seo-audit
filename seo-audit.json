@@ -1,0 +1,462 @@
+{
+  "name": "seo-audit",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "audit",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        -496
+      ],
+      "id": "7e04a0ff-6e84-4f09-97a1-8e6386f7f9c7",
+      "name": "Webhook",
+      "webhookId": "33cc2660-1d3f-4b10-ac94-9f9ff8f6a9b2",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/pagespeedonline/v5/runPagespeed",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Webhook').item.json.body.url }}"
+            },
+            {
+              "name": "category",
+              "value": "PERFORMANCE"
+            },
+            {
+              "name": "strategy",
+              "value": "MOBILE"
+            },
+            {
+              "name": "key",
+              "value": "AIzaSyCOM5u0DP7MBCvmL7ckNy5iA8U2Xy6JNUg"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        320,
+        -496
+      ],
+      "id": "dead1be8-ef96-4625-953f-72d8deeac80e",
+      "name": "HTTP Request",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "sendTo": "=kontakt@hasimuener.de",
+        "subject": "=Dein Growth Audit für: {{ $('Webhook').first().json.body.url }}",
+        "message": "=<p>Hallo,</p>\n\n<p>die Tiefen-Analyse für <strong>{{ $('Webhook').first().json.body.url }}</strong> ist abgeschlossen.</p>\n\n<p>Wir haben nicht nur an der Oberfläche gekratzt, sondern zwei kritische Bereiche geprüft: Die <strong>technische Performance</strong> (Ladezeiten/Google-Ranking) und die <strong>Verkaufspsychologie</strong> (überzeugt der Text?).</p>\n\n<p><strong>Das Ergebnis deckt auf:</strong></p>\n<ul>\n  <li>📉 Wo Sie Besucher durch Ladezeiten verlieren.</li>\n  <li>🧠 Wo Texte Kunden eher verwirren als überzeugen.</li>\n  <li>🚀 Welche 3 Sofort-Maßnahmen den größten Hebel haben.</li>\n</ul>\n\n<p>\n<a href=\"{{ $json.url }}\" style=\"background-color: #2c3e50; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;\">👉 Analyse jetzt öffnen (PDF)</a>\n</p>\n\n<hr style=\"border: 0; border-top: 1px solid #eee; margin: 30px 0;\">\n\n<p><strong>Wie geht es weiter?</strong></p>\n\n<p>Meistens scheitert die Optimierung an der Zeit. Deshalb arbeite ich nicht mit Stundenlöhnen, sondern mit fertigen Lösungs-Modulen.</p>\n\n<p><strong>Mein Angebot: Der 7-Tage-Sprint.</strong><br>\nIch behebe die Top-3 Fehler aus diesem Report für Sie. Fixpreis. Fixes Ergebnis. Keine langen Meetings.</p>\n\n<p>Antworten Sie kurz mit <strong>„SPRINT“</strong>, wenn Sie die Umsetzung abgeben möchten.</p>\n\n<p>Beste Grüße,<br>\nHasim</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        -80
+      ],
+      "id": "c668f53f-d22e-45eb-8a13-d64d00f54d05",
+      "name": "Send a message",
+      "webhookId": "6a7bf906-6e8c-4ca0-b922-ea7828b2abfe",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jceQt5hqhfjV9PFp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://r.jina.ai/{{ $json.body.__submission.user_inputs.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "=User-Agent",
+              "value": "={{ $json.body.__submission.user_inputs.url }}"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        128,
+        -496
+      ],
+      "id": "7fa43233-37fd-40b4-bd6e-fe193ae69944",
+      "name": "HTTP Request1",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "URL/HTML to PDF",
+        "convertType": "htmlToPDF",
+        "html": "={{ $json.html }}",
+        "advancedOptions": {}
+      },
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -80
+      ],
+      "id": "08624da5-dd7f-45cd-a29f-bc1c2dc29edb",
+      "name": "PDFco Api",
+      "credentials": {
+        "pdfcoApi": {
+          "id": "ePojo48aGwIKUFbM",
+          "name": "PDF.co account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// HELFER: Daten sicher extrahieren\nfunction extractText(nodeData) {\n  if (!nodeData) return \"<p><i>Keine Daten verfügbar.</i></p>\";\n  const json = nodeData.json;\n  \n  // Pfad-Suche für Agenten-Output\n  if (json.output && json.output[0] && json.output[0].content && json.output[0].content[0] && json.output[0].content[0].text) {\n    return json.output[0].content[0].text;\n  }\n  if (json.text) return json.text;\n  if (json.content && typeof json.content === 'string') return json.content;\n  return JSON.stringify(json);\n}\n\n// 1. Agenten auslesen\nconst agent1Node = $('Agent 1: Tech-Analyst').first();\nconst agent3Node = $('Agent 3: Strategie-Berater').first();\n\nconst techContent = extractText(agent1Node);\nconst strategyContent = extractText(agent3Node);\n\n// 2. Metadaten sauber holen\nlet url = \"Ihre Webseite\";\ntry {\n   const body = $('Webhook').first().json.body;\n   url = body.__submission?.user_inputs?.url || body.url || \"Ihre Webseite\";\n   // URL bereinigen\n   url = url.replace(/(^\\w+:|^)\\/\\//, '').replace(/\\/$/, '');\n} catch (e) {}\n\nconst date = new Date().toLocaleDateString('de-DE');\n\n// 3. Champions League HTML (Layout Fix)\nconst finalHtml = `\n<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap');\n  \n  body { \n    font-family: 'Plus Jakarta Sans', sans-serif; \n    color: #1e293b; \n    margin: 0; padding: 0; \n    line-height: 1.5; \n  }\n\n  /* DECKBLATT - FIXED: Höhe reduziert & Box-Sizing */\n  .cover { \n    height: 920px; /* Reduziert von 1050px -> Passt sicher auf A4 */\n    background: radial-gradient(circle at top right, #1e293b, #0f172a);\n    color: white; \n    padding: 50px; /* Etwas weniger Rand */\n    position: relative; \n    page-break-after: always;\n    box-sizing: border-box; /* WICHTIG: Verhindert, dass Padding die Seite sprengt */\n  }\n  \n  .brand { \n    font-size: 14px; \n    letter-spacing: 4px; \n    text-transform: uppercase; \n    color: #38bdf8; \n    font-weight: 800; \n    border-bottom: 1px solid rgba(56, 189, 248, 0.3);\n    padding-bottom: 20px;\n    display: inline-block;\n  }\n\n  .hero-text { margin-top: 150px; } /* Etwas höher gezogen */\n  \n  h1 { \n    font-size: 64px; \n    font-weight: 800; \n    line-height: 1.1; \n    margin: 0 0 25px 0; \n    color: #fff;\n  }\n  \n  .highlight {\n    background: linear-gradient(90deg, #38bdf8, #818cf8);\n    -webkit-background-clip: text;\n    -webkit-text-fill-color: transparent;\n  }\n  \n  .subtitle { \n    font-size: 20px; \n    color: #94a3b8; \n    font-weight: 400; \n    max-width: 600px;\n  }\n  \n  .meta-grid { \n    position: absolute; \n    bottom: 50px; \n    left: 50px; \n    right: 50px; \n    border-top: 1px solid rgba(255,255,255,0.1); \n    padding-top: 25px; \n    display: flex; \n    justify-content: space-between; \n    color: #64748b; \n    font-size: 13px; \n    text-transform: uppercase;\n    letter-spacing: 1px;\n  }\n  \n  .meta-val { display: block; color: #fff; font-size: 16px; margin-top: 5px; font-weight: 600; text-transform: none; letter-spacing: 0; }\n\n  /* INHALT SEITEN */\n  .page { padding: 40px 50px; page-break-after: always; }\n  \n  h2 { \n    font-size: 26px; \n    color: #0f172a; \n    margin-top: 0; \n    margin-bottom: 25px;\n    display: flex;\n    align-items: center;\n    gap: 10px;\n  }\n  \n  h2::before {\n    content: ''; display: block; width: 6px; height: 26px; background: #38bdf8; border-radius: 4px;\n  }\n\n  /* Score Cards */\n  .score-grid { display: flex; gap: 15px; margin-bottom: 30px; }\n  .card { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; text-align: center; }\n  .card-title { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 5px; letter-spacing: 1px; }\n  .card-value { font-size: 32px; font-weight: 800; color: #0f172a; }\n  \n  .status-good { color: #22c55e; }\n  .status-ok { color: #f59e0b; }\n  .status-bad { color: #ef4444; }\n\n  /* Listen & Text */\n  ul { list-style: none; padding: 0; }\n  li { \n    background: #fff; \n    border-left: 4px solid #e2e8f0; \n    padding: 15px; \n    margin-bottom: 12px; \n    border-radius: 0 6px 6px 0; \n    box-shadow: 0 2px 4px rgba(0,0,0,0.02);\n    font-size: 14px;\n  }\n  p { font-size: 15px; margin-bottom: 15px; }\n  strong { color: #0f172a; font-weight: 700; }\n  \n  .footer { \n    margin-top: 60px; \n    text-align: center; \n    font-size: 11px; \n    color: #cbd5e1; \n    border-top: 1px solid #f1f5f9; \n    padding-top: 20px; \n  }\n</style>\n</head>\n<body>\n\n  <div class=\"cover\">\n    <div class=\"brand\">NEXUS GROWTH AUDIT</div>\n    \n    <div class=\"hero-text\">\n      <h1>Performance & <br><span class=\"highlight\">Conversion Psychologie</span></h1>\n      <div class=\"subtitle\">Eine datengetriebene Analyse Ihrer digitalen Potenziale.</div>\n    </div>\n\n    <div class=\"meta-grid\">\n      <div>Projekt <span class=\"meta-val\">${url}</span></div>\n      <div style=\"text-align:right\">Erstellt am <span class=\"meta-val\">${date}</span></div>\n    </div>\n  </div>\n\n  <div class=\"page\">\n    <h2>Technisches Fundament</h2>\n    ${techContent}\n  </div>\n\n  <div class=\"page\" style=\"page-break-after: avoid;\">\n    <h2>Conversion & Strategie</h2>\n    ${strategyContent}\n    \n    <div class=\"footer\">\n      Exklusiver Audit Report | Erstellt von Hasim Üner\n    </div>\n  </div>\n\n</body>\n</html>\n`;\n\nreturn { html: finalHtml };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -80
+      ],
+      "id": "4db06517-ff02-4996-9708-f76316783f4e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "GPT-5.2"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Du bist \"Nexus Tech-Analyst\", ein spezialisierter WordPress-Performance-Experte.\nDeine Aufgabe: Analysiere die rohen Google PageSpeed JSON-Daten und erstelle daraus den HTML-Inhalt für den Technik-Teil eines PDF-Reports.\n\nREGELN FÜR DEINEN OUTPUT:\n1. Gib NUR reines HTML zurück. Kein Markdown (keine ```html Tags!), keine Einleitung, kein \"Hier ist der Code\".\n2. Das HTML muss direkt in den <body> passen (nutze <div>, <ul>, <li>, <p>, <h3>).\n3. Nutze KEINE kompletten HTML-Gerüste (kein <html>, <head> oder <body> Tag).\n4. Wenn du Zahlen im JSON findest (z.B. \"score\": 0.85), rechne sie in Prozent um (85) oder runde Sekunden auf 1 Nachkommastelle.\n5. Sei gnadenlos ehrlich. Wenn der Score schlecht ist, sag das.\n6. Design: Nutze für die Scores das Layout mit der CSS-Klasse \"score-grid\" und \"card\" (siehe unten).\n\nDEIN HTML-LAYOUT MUSS SO AUSSEHEN:\n<div class=\"score-grid\">\n  <div class=\"card\">\n    <div class=\"card-title\">Mobile Score</div>\n    <div class=\"card-value status-[bad/ok/good]\">[Hier Score 0-100]</div>\n  </div>\n  <div class=\"card\">\n    <div class=\"card-title\">Ladezeit (LCP)</div>\n    <div class=\"card-value\">[Hier LCP in s]</div>\n  </div>\n  <div class=\"card\">\n    <div class=\"card-title\">Stabilität (CLS)</div>\n    <div class=\"card-value\">[Hier CLS Wert]</div>\n  </div>\n</div>\n\n<h3>Die größten Bremsen</h3>\n<ul>\n  <li><strong>[Problem Titel]:</strong> [Beschreibung] (Verursacher: [Dateiname aus JSON])</li>\n  </ul>\n\nWICHTIG - SCORE REGEL:\n- Wenn der \"mobile_score\" 95 oder höher ist:\n  1. Schreibe unter \"Die größten Bremsen\" NUR den Satz: \"Exzellente technische Basis. Keine kritischen Fehler gefunden.\"\n  2. Ignoriere alle kleinen \"Diagnostics\" aus dem JSON.\n  3. Liste KEINE Punkte auf."
+            },
+            {
+              "content": "=Hier sind die gefilterten Analysedaten (cleanData):\n\n{{ JSON.stringify($json) }}\n\nANWEISUNG:\nDu hast ein vereinfachtes Datenobjekt erhalten. Nutze NUR diese Felder:\n\n1. Score: Der Wert steht direkt in \"mobile_score\" (Es ist schon eine Zahl 0-100).\n2. LCP: Der Wert steht in \"metrics.LCP\".\n3. CLS: Der Wert steht in \"metrics.CLS\".\n4. Bremsen: Nutze das Array \"top_issues\". Nimm daraus \"title\" als Überschrift und \"saving\" als Einsparpotenzial.\n\nWICHTIG:\n- Setze die CSS-Klasse \"status-bad\" (rot) wenn mobile_score < 50, \"status-ok\" wenn 50-89, \"status-good\" wenn > 90.\n- Erfinde KEINE Daten. Nutze nur das, was im JSON steht."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        -288
+      ],
+      "id": "364dc24a-c608-44d4-9e62-984c29fd95dc",
+      "name": "Agent 1: Tech-Analyst",
+      "credentials": {
+        "openAiApi": {
+          "id": "pvAPFvvDSZ05pREb",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "GPT-5.2"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Du bist Nexus Frontend-Architect.\nDeine Aufgabe: Nimm die JSON-Audit-Daten und verwandle sie in ein professionelles HTML-Fragment für einen E-Mail-Report.\n\nINPUT: Strukturierte JSON-Daten über Schwachstellen einer Webseite.\nOUTPUT: Ein HTML-Fragment (ohne <html>, <head>, <body> Tags), das direkt in eine E-Mail eingebettet werden kann.\n\nDESIGN-REGELN:\n1. Nutze Inline-Styles für sauberes Layout (keine externen CSS-Dateien).\n2. Nutze eine \"Card\"-Optik mit leichtem Schatten oder Border.\n3. Wenn der \"clarity_score\" < 50 ist, färbe die Zahl rot, sonst grün.\n4. Liste die \"conversion_leaks\" als saubere Liste auf. Nutze <strong> für den Titel des Fehlers.\n5. Gib NUR den HTML-Code zurück. Kein Markdown, keine Erklärungen."
+            },
+            {
+              "content": "=Erstelle das HTML-Reporting basierend auf diesen Analyse-Daten:\n\n{{ JSON.stringify($json) }}\n\n(Hinweis: Wähle hier im Expression-Editor den Output von Agent 2 aus. Meistens ist es $json.content oder $json.message.content, je nachdem welches Modell du nutzt.)"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        -288
+      ],
+      "id": "911e44c4-ffc7-4971-8f5f-7c590a5b831c",
+      "name": "Agent 3: Strategie-Berater",
+      "retryOnFail": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "pvAPFvvDSZ05pREb",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "GPT-5.2"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Du bist Agent 2 (Content-Psychologe) für ein Website-Audit.\nDeine Aufgabe: Analysiere den gelieferten Website-Text auf verkaufspsychologische Lücken.\n\nWICHTIG:\n1. Gib als einziges Ergebnis ein valides JSON-Objekt zurück.\n2. Kein Markdown, keine Backticks (```), kein Intro-Text. Nur das rohe JSON.\n\nNutze exakt dieses JSON-Schema:\n{\n  \"content_overview\": {\n    \"url\": \"input_url\",\n    \"primary_offer_guess\": \"Kurze Beschreibung des Angebots\",\n    \"target_audience_guess\": \"Vermutete Zielgruppe\"\n  },\n  \"message_match\": {\n    \"clarity_score\": 0,\n    \"what_they_sell_in_1_sentence\": \"\",\n    \"main_confusions\": [\"Punkt 1\", \"Punkt 2\"]\n  },\n  \"conversion_leaks\": [\n    {\n      \"severity\": \"high|medium|low\",\n      \"title\": \"Kurzer Titel des Fehlers\",\n      \"evidence_quote\": \"Zitat von der Seite (max 15 Wörter)\",\n      \"why_it_hurts\": \"Warum das Conversions kostet\",\n      \"fix\": {\n        \"principle\": \"Das Prinzip dahinter\",\n        \"rewrite\": \"Besserer Vorschlag\"\n      }\n    }\n  ],\n  \"cta_check\": {\n    \"current_cta\": \"Aktueller Button-Text\",\n    \"better_cta\": \"Optimierter Vorschlag\"\n  }\n}\n\nRegeln:\n- Sei kritisch, aber konstruktiv.\n- \"clarity_score\" ist eine Zahl von 0 bis 100.\n- Finde maximal 5 \"conversion_leaks\"."
+            },
+            {
+              "content": "={{ JSON.stringify($('HTTP Request1').first().json) }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        256,
+        -288
+      ],
+      "id": "a16a5243-09d8-49d2-b768-9807b500edd8",
+      "name": "Agent 2: Content-Psychologe",
+      "credentials": {
+        "openAiApi": {
+          "id": "pvAPFvvDSZ05pREb",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Hole die riesigen Google Daten\nconst googleData = items[0].json;\n\n// Check: Haben wir überhaupt Daten?\nif (!googleData.lighthouseResult) {\n  return { error: \"Keine Google Daten empfangen\" };\n}\n\nconst lh = googleData.lighthouseResult;\nconst audits = lh.audits;\n\n// 2. Wir bauen ein \"schlankes\" Paket nur mit dem Nötigsten\nconst cleanData = {\n  // Die Scores\n  mobile_score: (lh.categories.performance.score * 100).toFixed(0),\n  metrics: {\n    LCP: audits['largest-contentful-paint'].displayValue,\n    CLS: audits['cumulative-layout-shift'].displayValue,\n    TBT: audits['total-blocking-time'].displayValue\n  },\n  \n  // Die Top 5 Probleme (gefiltert & sortiert)\n  top_issues: Object.values(audits)\n    // Nur Audits nehmen, die Fehler sind (Score < 0.9) und Details haben\n    .filter(a => a.score !== null && a.score < 0.9 && a.details && a.details.type === 'table')\n    .sort((a, b) => (a.score || 1) - (b.score || 1)) // Schlimmste zuerst\n    .slice(0, 5) // Nur Top 5\n    .map(a => ({\n      title: a.title,\n      saving: a.displayValue,\n      description: a.description.substring(0, 150) + \"...\" // Text kürzen!\n    }))\n};\n\nreturn cleanData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        -496
+      ],
+      "id": "1c348cbc-6f53-43d8-b021-4aff53314c6d",
+      "name": "Google Filter"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "hasim.app.n8n.cloud",
+            "user-agent": "WordPress/6.8.3; https://hasimuener.de",
+            "content-length": "704",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "2a00:1c98:60:1::21d",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "BE",
+            "cf-ray": "9bd1c7c27152cbb9-AMS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "2a00:1c98:60:1::21d, 104.23.172.9",
+            "x-forwarded-host": "hasim.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-109-7d5ddcd948-qgtf9",
+            "x-is-trusted": "yes",
+            "x-real-ip": "2a00:1c98:60:1::21d"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "url": "https://hasimuener.de/",
+            "email": "hallo@hasimuener.de",
+            "gdpr-agreement_1": "on",
+            "__submission": {
+              "id": "93",
+              "form_id": "29",
+              "serial_number": "20",
+              "source_url": "https://hasimuener.de/?fluent_forms_pages=1&design_mode=1&preview_id=29",
+              "user_id": "1",
+              "status": "unread",
+              "is_favourite": "0",
+              "browser": "Firefox",
+              "device": "Apple",
+              "ip": "2a02:560:544c:bd00:1db3:1d45:c744:8912",
+              "city": null,
+              "country": null,
+              "payment_status": null,
+              "payment_method": null,
+              "payment_type": null,
+              "currency": null,
+              "payment_total": null,
+              "total_paid": null,
+              "created_at": "2026-01-13 02:53:17",
+              "updated_at": "2026-01-13 02:53:17",
+              "user_inputs": {
+                "url": "https://hasimuener.de/",
+                "email": "hallo@hasimuener.de",
+                "gdpr-agreement_1": "Akzeptiert"
+              }
+            }
+          },
+          "webhookUrl": "https://hasim.app.n8n.cloud/webhook/audit",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Google Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFco Api": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 1: Tech-Analyst": {
+      "main": [
+        [
+          {
+            "node": "Agent 2: Content-Psychologe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 3: Strategie-Berater": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 2: Content-Psychologe": {
+      "main": [
+        [
+          {
+            "node": "Agent 3: Strategie-Berater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "PDFco Api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Filter": {
+      "main": [
+        [
+          {
+            "node": "Agent 1: Tech-Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0618a50f-ae2c-40be-a7ea-158317e875d1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6720542a04e3679c4a403848bb4a1920c783bd7b0f98fa9b325ce207776305c"
+  },
+  "id": "ZvgbyzYQHds3lRhp",
+  "tags": []
+}
